@@ -83,7 +83,7 @@ export default function MillsTab({ mills, setMills }) {
             </div>
           </div>
           <button onClick={handleDownloadSample} className="text-xs font-medium text-slate-500 hover:text-blue-600 flex items-center gap-1 transition-colors">
-            <Download size={14} /> Download example CSV
+            <Download size={14} /> Download example CSV to upload
           </button>
         </div>
       </div>
