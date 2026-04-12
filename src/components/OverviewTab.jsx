@@ -1,6 +1,6 @@
-import React, { useRef } from 'react';
-import { BarChart, Bar, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Users, Building2, TrendingUp, Download, ArrowDownRight } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { Users, Building2, TrendingUp, Download, ArrowDownRight, LineChart } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { reportKpis } from '../data';
@@ -11,8 +11,16 @@ const costData = [
   { year: '2025', cost: 0.22 },
 ];
 
+// Extracted from the 2023, 2024, and 2025 annual reports
+const historicalTrendData = [
+  { year: '2023', beneficiaries: 3.8, mills: 64 },
+  { year: '2024', beneficiaries: 8.5, mills: 119 },
+  { year: '2025', beneficiaries: 13.1, mills: 242 },
+];
+
 export default function OverviewTab() {
   const reportRef = useRef(null);
+  const [trendMetric, setTrendMetric] = useState('beneficiaries'); // Toggles the chart view
 
   const generatePDF = async () => {
     const element = reportRef.current;
@@ -30,8 +38,8 @@ export default function OverviewTab() {
       {/* Action Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-slate-900">Executive Overview</h2>
-          <p className="text-sm text-slate-500 mt-1">Q4 2025 Impact Summary</p>
+          <h2 className="text-xl font-bold text-slate-900">Executive Overview</h2>
+          <p className="text-sm text-slate-500 mt-1">Q4 2025 Impact Summary & Historical Trends</p>
         </div>
         <button 
           onClick={generatePDF}
@@ -43,9 +51,9 @@ export default function OverviewTab() {
 
       {/* Report Container */}
       <div ref={reportRef} className="bg-slate-50 p-2 -m-2">
+        
+        {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          
-          {/* Clean KPI Cards */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
             <div className="flex justify-between items-start mb-4">
               <span className="text-sm font-medium text-slate-500">Beneficiaries<br/>Reached</span>
@@ -70,7 +78,6 @@ export default function OverviewTab() {
             <p className="text-3xl font-bold text-slate-900">{reportKpis.monthlyFlourMT}</p>
           </div>
 
-          {/* Micro-Chart Card */}
           <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between">
             <div className="flex justify-between items-start">
               <span className="text-sm font-medium text-slate-500">Cost Per<br/>Beneficiary</span>
@@ -95,9 +102,66 @@ export default function OverviewTab() {
             </div>
           </div>
         </div>
+
+        {/* NEW: Time Series Trend Analysis */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mb-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+            <div>
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <LineChart size={18} className="text-blue-600"/> Multi-Year Growth Trajectory
+              </h3>
+              <p className="text-sm text-slate-500 mt-1">Cross-referencing programmatic scale from 2023-2025 Annual Reports.</p>
+            </div>
+            
+            {/* Chart Data Toggles */}
+            <div className="flex bg-slate-100 p-1 rounded-lg">
+              <button 
+                onClick={() => setTrendMetric('beneficiaries')}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${trendMetric === 'beneficiaries' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+              >
+                Beneficiaries (Millions)
+              </button>
+              <button 
+                onClick={() => setTrendMetric('mills')}
+                className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-all ${trendMetric === 'mills' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-800'}`}
+              >
+                Active Mills
+              </button>
+            </div>
+          </div>
+
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={historicalTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorMetric" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={trendMetric === 'beneficiaries' ? '#3b82f6' : '#10b981'} stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor={trendMetric === 'beneficiaries' ? '#3b82f6' : '#10b981'} stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                <XAxis dataKey="year" stroke="#64748b" tick={{fill: '#64748b', fontSize: 12}} tickLine={false} axisLine={false} />
+                <YAxis stroke="#64748b" tick={{fill: '#64748b', fontSize: 12}} tickLine={false} axisLine={false} />
+                <Tooltip 
+                  contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', fontSize: '14px' }} 
+                  formatter={(value) => [trendMetric === 'beneficiaries' ? `${value} Million` : value, trendMetric === 'beneficiaries' ? 'Beneficiaries' : 'Mills']}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey={trendMetric} 
+                  stroke={trendMetric === 'beneficiaries' ? '#3b82f6' : '#10b981'} 
+                  strokeWidth={3}
+                  fillOpacity={1} 
+                  fill="url(#colorMetric)" 
+                  activeDot={{ r: 6, fill: trendMetric === 'beneficiaries' ? '#3b82f6' : '#10b981', stroke: '#fff', strokeWidth: 2 }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
         
-        <p className="text-sm text-slate-400 mb-6 mt-2 text-right">
-          * KPI metrics and cost calculations anchored in 2025 Annual Report data.
+        <p className="text-xs text-slate-400 mb-6 text-right">
+          * KPI metrics and historical calculations anchored in 2023, 2024, and 2025 Annual Report data.
         </p>
         
         <div className="mt-6">
