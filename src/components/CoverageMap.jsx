@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { CalendarDays, MapPin } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 
-// Reconstructed from 2023, 2024, and 2025 Annual Reports
 const allStates = [
   { id: 'mh', name: 'Maharashtra', coords: [19.7515, 75.7139], yearAdded: 2023 },
   { id: 'mp', name: 'Madhya Pradesh', coords: [22.9734, 78.6569], yearAdded: 2023 },
@@ -23,68 +22,22 @@ const allStates = [
   { id: 'or', name: 'Odisha', coords: [20.9517, 85.0985], yearAdded: 2025 },
 ];
 
-export default function CoverageMap() {
-  const [selectedYear, setSelectedYear] = useState(2025);
-
-  // Dynamic filter based on timeline state
+export default function CoverageMap({ filters }) {
+  const selectedYear = parseInt(filters.year);
   const activeStates = allStates.filter(state => state.yearAdded <= selectedYear);
 
   return (
-    <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 flex flex-col h-full">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <div>
-          <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <MapPin size={18} className="text-blue-600" /> National Footprint Timeline
-          </h3>
-          <p className="text-sm text-slate-500 mt-1">
-            Tracking expansion across {selectedYear === 2023 ? '3' : selectedYear === 2024 ? '10' : '16'} active states.
-          </p>
-        </div>
-        
-        {/* Timeline Controls */}
-        <div className="flex bg-slate-100 p-1.5 rounded-lg items-center border border-slate-200">
-          <CalendarDays size={16} className="text-slate-500 mx-2" />
-          <div className="flex gap-1">
-            {[2023, 2024, 2025].map(year => (
-              <button
-                key={year}
-                onClick={() => setSelectedYear(year)}
-                className={`px-4 py-1.5 text-sm font-bold rounded-md transition-all ${
-                  selectedYear === year 
-                    ? 'bg-white text-blue-600 shadow-sm border border-slate-200/50' 
-                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'
-                }`}
-              >
-                {year}
-              </button>
-            ))}
-          </div>
-        </div>
+    <div className="p-4">
+      <div className="flex items-center gap-2 mb-4">
+        <MapPin size={18} className="text-blue-600" />
+        <h3 className="font-bold text-slate-900">Expansion Progress ({selectedYear})</h3>
       </div>
-
-      <div className="rounded-lg overflow-hidden border border-slate-200 relative z-0">
-        <MapContainer 
-          center={[22.90, 78.66]} 
-          zoom={4.5} 
-          scrollWheelZoom={false}
-          style={{ height: '400px', width: '100%', zIndex: 1 }}
-        >
-          <TileLayer
-            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          />
-
+      <div className="rounded-xl overflow-hidden border border-slate-200 h-[400px]">
+        <MapContainer center={[22.90, 78.66]} zoom={4.5} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
+          <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" />
           {activeStates.map(state => (
-            <CircleMarker 
-              key={state.id} 
-              center={state.coords} 
-              pathOptions={{ color: '#2563eb', fillColor: '#3b82f6', fillOpacity: 0.6, weight: 2 }}
-              radius={10}
-            >
-              <Popup>
-                <div className="font-bold text-slate-900">{state.name}</div>
-                <div className="text-xs text-slate-500 font-medium">Onboarded: {state.yearAdded}</div>
-              </Popup>
+            <CircleMarker key={state.id} center={state.coords} pathOptions={{ color: '#2563eb', fillColor: '#3b82f6', fillOpacity: 0.6, weight: 2 }} radius={10}>
+              <Popup><div className="font-bold">{state.name}</div><div className="text-xs">Added in {state.yearAdded}</div></Popup>
             </CircleMarker>
           ))}
         </MapContainer>

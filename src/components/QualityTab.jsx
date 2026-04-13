@@ -1,137 +1,156 @@
-import React from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceArea, ResponsiveContainer } from 'recharts';
-import { Smartphone, CheckCircle, AlertTriangle, Activity, TestTube, Cpu } from 'lucide-react';
-import { qualityData, aiFeed } from '../data';
+import React, { useState } from 'react';
+import { ShieldCheck, Zap, Microscope, CheckCircle2, Filter, Info, ChevronRight, BrainCircuit, Activity } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { auditLogs } from '../data';
 
-const graphData = [
-  ...qualityData,
-  { month: 'Jul (Est)', iron: 27, isPrediction: true } 
+const complianceChartData = [
+  { metric: 'Adequately Fortified (>30ppm)', value: 88, color: '#10b981', key: 'Adequate' },
+  { metric: 'Partially Fortified (15-30ppm)', value: 9, color: '#f59e0b', key: 'Partial' },
+  { metric: 'Under Fortified (<15ppm)', value: 3, color: '#ef4444', key: 'Under' },
 ];
 
-export default function QualityTab() {
+export default function QualityTab({ filters }) {
+  const [internalFilter, setInternalFilter] = useState('All');
+
+  // DRILLDOWN LOGIC: Filters based on Top Bar (State) AND Internal Log Filter (Status)
+  const filteredLogs = auditLogs.filter(log => {
+    const stateMatch = filters.state === 'All India' || log.state === filters.state;
+    const statusMatch = internalFilter === 'All' || log.status === internalFilter;
+    return stateMatch && statusMatch;
+  });
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      {/* Header Area */}
+      <div className="flex justify-between items-end">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Quality Control Hub</h2>
-          <p className="text-sm text-slate-500 mt-1">iCheck Analytics & AI Iron Lens Feed</p>
+          <h2 className="text-2xl font-bold text-slate-900">Quality Assurance Hub</h2>
+          <p className="text-slate-500 text-sm mt-1">Real-time iron validation via AI Iron Lens & iCheck Assays.</p>
         </div>
-        <div className="bg-white border border-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm">
-          <Activity size={16} className="text-emerald-500 animate-pulse" />
-          System Status: Monitoring
+        <div className="flex items-center gap-2 bg-emerald-100 text-emerald-700 px-4 py-2 rounded-xl font-bold text-sm border border-emerald-200 shadow-sm">
+          <ShieldCheck size={18} /> 94% Compliance
         </div>
       </div>
 
-      {/* Technology Primer Section */}
+      {/* Methodology Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex gap-4">
-          <div className="bg-blue-50 text-blue-600 p-3 rounded-lg h-fit shrink-0">
-            <TestTube size={24} />
+        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg"><Microscope size={20} /></div>
+            <h4 className="font-bold text-slate-900">iCheck Validation Tech</h4>
           </div>
-          <div>
-            <h3 className="font-semibold text-slate-900 mb-1">The Hardware: iCheck Device</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              The industry standard spectrophotometer used by mill partners on-site. It quantitatively measures the exact iron concentration (ppm) in fortified flour samples to ensure they meet the strict FSSAI 28-32 ppm standard.
-            </p>
-          </div>
+          <p className="text-xs text-slate-500 leading-relaxed">
+            Developed by <strong>Bioanalyt in Germany</strong>, this rapid testing device measures added iron (NaFeEDTA) in fortified atta. 
+            Because Indian atta has unique mineral variability, Fortify Health conducts secondary validation to ensure precision beyond standard manufacturer specs.
+          </p>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm flex gap-4">
-          <div className="bg-purple-50 text-purple-600 p-3 rounded-lg h-fit shrink-0">
-            <Cpu size={24} />
+        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 bg-purple-50 text-purple-600 rounded-lg"><Zap size={20} /></div>
+            <h4 className="font-bold text-slate-900">AI Iron Lens Prototype</h4>
           </div>
-          <div>
-            <h3 className="font-semibold text-slate-900 mb-1">The Software: AI Iron Lens</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Fortify Health's proprietary 2025 AI tool. Partners send photos of their physical iCheck vials via WhatsApp. The AI instantly processes the image colorimetric data to estimate ppm, automating compliance tracking without manual data entry.
-            </p>
-          </div>
+          <p className="text-xs text-slate-500 leading-relaxed">
+            A collaboration with <strong>Georgia Institute of Technology</strong> and <strong>Hornbill Agritech</strong>. 
+            The system uses image processing and supervised learning to remove human bias from manual spot tests, categorizing iron levels in real-time.
+          </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* The iCheck Recharts Graph */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col">
-          <div className="mb-6 flex flex-col sm:flex-row justify-between items-start gap-4">
-            <div>
-              <h3 className="text-base font-bold text-slate-900">Aggregate Iron Levels (ppm)</h3>
-              <p className="text-sm text-slate-500 mt-1">Sample of all active mills. Dotted line indicates AI trend projection.</p>
-            </div>
-            <div className="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-md text-xs font-semibold border border-emerald-100 shrink-0">
-              FSSAI Safe Zone: 28-32 ppm
-            </div>
-          </div>
-          
-          <div className="h-80 w-full flex-grow">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* Compliance Graph - 2 Cols */}
+        <div className="lg:col-span-2 bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
+          <h3 className="font-bold text-slate-900 mb-6 flex items-center gap-2">
+            Compliance Breakdown ({filters.year})
+          </h3>
+          <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={graphData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                <XAxis dataKey="month" stroke="#64748b" tick={{fill: '#64748b', fontSize: 12}} tickLine={false} axisLine={false} />
-                <YAxis stroke="#64748b" domain={[20, 40]} tick={{fill: '#64748b', fontSize: 12}} tickLine={false} axisLine={false} />
-                <Tooltip 
-                  contentStyle={{ borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', fontSize: '14px' }} 
-                />
-                
-                {/* The Green Compliance Band */}
-                <ReferenceArea y1={28} y2={32} fill="#10b981" fillOpacity={0.1} />
-                
-                {/* Historical Data Line */}
-                <Line 
-                  type="monotone" 
-                  dataKey="iron" 
-                  stroke="#3b82f6" 
-                  strokeWidth={3} 
-                  dot={{ r: 5, fill: '#ffffff', stroke: '#3b82f6', strokeWidth: 2 }} 
-                  activeDot={{ r: 7, fill: '#3b82f6' }} 
-                />
-              </LineChart>
+              <BarChart data={complianceChartData} layout="vertical" margin={{ left: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                <XAxis type="number" hide />
+                <YAxis dataKey="metric" type="category" axisLine={false} tickLine={false} width={150} tick={{ fontSize: 10, fontWeight: 700, fill: '#64748b' }} />
+                <Tooltip cursor={{ fill: '#f8fafc' }} contentStyle={{borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} />
+                <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={35}>
+                  {complianceChartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* AI Iron Lens Live Feed Sidebar */}
-        <div className="bg-slate-50 rounded-xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
-          <div className="bg-white border-b border-slate-200 p-4 flex items-center gap-3">
-            <div className="p-2 bg-slate-100 rounded-lg text-slate-700">
-              <Smartphone size={20} />
+        {/* Filterable Internal Audit Log - 3 Cols */}
+        <div className="lg:col-span-3 bg-slate-900 rounded-2xl shadow-2xl flex flex-col border border-slate-800 overflow-hidden">
+          <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/[0.02]">
+            <div className="flex items-center gap-3 text-emerald-400">
+              <Activity size={20} />
+              <h3 className="font-bold text-white">Internal Audit Log: {filters.state}</h3>
             </div>
-            <h3 className="font-semibold text-slate-900">AI Iron Lens Feed</h3>
+            {/* Local Filter Toggle */}
+            <div className="flex gap-2 bg-white/5 p-1 rounded-lg border border-white/10">
+              {['All', 'Adequate', 'Partial', 'Under'].map(f => (
+                <button 
+                  key={f}
+                  onClick={() => setInternalFilter(f)}
+                  className={`px-2 py-1 text-[10px] font-bold rounded transition-all ${internalFilter === f ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}
+                >
+                  {f}
+                </button>
+              ))}
+            </div>
           </div>
-          
-          <div className="p-4 flex-grow overflow-y-auto space-y-3">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Live WhatsApp Verification</p>
-            
-            {aiFeed.map((alert) => (
-              <div 
-                key={alert.id} 
-                className={`bg-white rounded-lg p-3 shadow-sm border ${alert.status === 'Warning' ? 'border-l-4 border-l-amber-400 border-y-slate-200 border-r-slate-200' : 'border-l-4 border-l-emerald-400 border-y-slate-200 border-r-slate-200'}`}
-              >
-                <div className="flex justify-between items-start mb-1.5">
-                  <span className="font-medium text-slate-900 text-sm">{alert.mill}</span>
-                  <span className="text-xs text-slate-400">{alert.time}</span>
+
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-[300px] custom-scrollbar">
+            {filteredLogs.length > 0 ? filteredLogs.map(log => (
+              <div key={log.id} className="group flex items-center justify-between p-4 bg-white/[0.03] hover:bg-white/[0.06] rounded-xl border border-white/5 transition-all">
+                <div>
+                  <div className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">{log.mill}</div>
+                  <div className="text-[10px] text-slate-500 uppercase font-bold tracking-widest mt-1">{log.state} • {log.date}</div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {alert.status === 'Pass' ? (
-                    <CheckCircle size={14} className="text-emerald-500" />
-                  ) : (
-                    <AlertTriangle size={14} className="text-amber-500" />
-                  )}
-                  <span className="text-sm text-slate-600">Est: {alert.result}</span>
-                  <span className={`ml-auto text-xs font-medium px-2 py-0.5 rounded ${alert.status === 'Pass' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
-                    {alert.status}
-                  </span>
+                <div className={`px-3 py-1 rounded-full text-[10px] font-black ${
+                  log.status === 'Adequate' ? 'bg-emerald-500/20 text-emerald-400' : 
+                  log.status === 'Partial' ? 'bg-amber-500/20 text-amber-400' : 'bg-rose-500/20 text-rose-400'
+                }`}>
+                  {log.iron} PPM
                 </div>
               </div>
-            ))}
-            
-            <div className="flex items-center justify-center gap-2 mt-6 text-slate-400 text-xs font-medium">
-              <Activity size={14} className="animate-pulse" /> Awaiting image submissions...
-            </div>
+            )) : (
+              <div className="text-center py-20 text-slate-500 text-sm italic">No logs found for this filter criteria.</div>
+            )}
           </div>
         </div>
+      </div>
 
+      {/* AI Methodology Section */}
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+        <div className="p-8 bg-slate-50 border-b border-slate-200">
+          <h3 className="text-xl font-bold text-slate-900 flex items-center gap-3">
+            <BrainCircuit size={24} className="text-purple-600" />
+            AI Methodology: Image Processing & Iron Content Estimation
+          </h3>
+        </div>
+        <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-10">
+          <div className="space-y-4">
+            <div className="text-xs font-black text-purple-600 uppercase tracking-widest">01. Pre-Processing</div>
+            <p className="text-xs text-slate-600 leading-relaxed font-medium">
+              Iron spot test images are cropped and brightness-normalized to eliminate lighting bias. A calibrated threshold masks glare, ensuring consistent input for the detector.
+            </p>
+          </div>
+          <div className="space-y-4">
+            <div className="text-xs font-black text-purple-600 uppercase tracking-widest">02. Feature Extraction</div>
+            <p className="text-xs text-slate-600 leading-relaxed font-medium">
+              We apply OpenCV’s multi-scale blob detector to isolate iron-reaction spots. This extracts key features like spot count and density to feed the predictive models.
+            </p>
+          </div>
+          <div className="space-y-4">
+            <div className="text-xs font-black text-purple-600 uppercase tracking-widest">03. Dual-Model Prediction</div>
+            <p className="text-xs text-slate-600 leading-relaxed font-medium">
+              <strong>Regression:</strong> Predicts numerical iron concentration.<br/>
+              <strong>Classification:</strong> Determines if content meets FSSAI (14-21.25 mg/kg) regulatory standards.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

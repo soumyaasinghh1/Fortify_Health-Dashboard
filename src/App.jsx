@@ -1,91 +1,78 @@
 import React, { useState } from 'react';
-import { initialMills } from './data';
 import OverviewTab from './components/OverviewTab';
-import MillsTab from './components/MillsTab';
 import QualityTab from './components/QualityTab';
-import { AlertTriangle, Activity, LayoutDashboard, Factory, ActivitySquare } from 'lucide-react';
+import { LayoutDashboard, ShieldCheck, Filter, ChevronDown } from 'lucide-react';
 
-export default function App() {
+function App() {
   const [activeTab, setActiveTab] = useState('overview');
-  
-  // This is the master state. CSV uploads in MillsTab will update this array.
-  const [mills, setMills] = useState(initialMills);
-
-  // Dynamic calculation for the warning alert banner
-  const actionRequiredCount = mills.filter(m => m.compliance < 90).length;
+  const [filters, setFilters] = useState({ state: 'All India', year: '2025' });
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-900">
-      
-      {/* Sleek Enterprise Header */}
-      <header className="mb-6 flex flex-col md:flex-row justify-between md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Fortify Health</h1>
-          <div className="flex items-center gap-2 mt-2">
-            <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm border border-blue-200">
-              <Activity size={12} /> Programme Monitoring Dashboard
-            </span>
-          </div>
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+      <nav className="fixed left-0 top-0 h-full w-64 bg-slate-900 text-slate-300 p-6 hidden lg:block z-50">
+        <div className="flex items-center gap-3 mb-10 px-2">
+          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold">F</div>
+          <h1 className="text-xl font-bold text-white tracking-tight">Fortify Health</h1>
         </div>
-      </header>
-
-      {/* MASSIVE NAVIGATION TABS - Designed for Recruiter UX */}
-      <div className="bg-slate-200/60 p-1.5 rounded-xl mb-8 shadow-inner border border-slate-200/80">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-          <button
-            onClick={() => setActiveTab('overview')}
-            className={`flex items-center justify-center gap-2 py-3.5 px-6 text-sm font-bold rounded-lg uppercase tracking-wider transition-all ${
-              activeTab === 'overview' 
-                ? 'bg-white text-blue-600 shadow-sm border border-slate-200/50' 
-                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/80'
-            }`}
-          >
-            <LayoutDashboard size={18} /> Executive Overview
+        
+        <div className="space-y-2">
+          <button onClick={() => setActiveTab('overview')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'overview' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' : 'hover:bg-slate-800'}`}>
+            <LayoutDashboard size={20} /> <span className="font-medium">Overview</span>
           </button>
+          <button onClick={() => setActiveTab('quality')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${activeTab === 'quality' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/20' : 'hover:bg-slate-800'}`}>
+            <ShieldCheck size={20} /> <span className="font-medium">Quality Control</span>
+          </button>
+        </div>
+      </nav>
+
+      <main className="lg:ml-64 p-8">
+        <div className="flex flex-wrap items-center gap-6 mb-8 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div className="flex items-center gap-2 text-slate-400">
+            <Filter size={18} />
+            <span className="text-[15px] font-bold uppercase tracking-widest">Filters</span>
+          </div>
           
-          <button
-            onClick={() => setActiveTab('mills')}
-            className={`flex items-center justify-center gap-2 py-3.5 px-6 text-sm font-bold rounded-lg uppercase tracking-wider transition-all ${
-              activeTab === 'mills' 
-                ? 'bg-white text-blue-600 shadow-sm border border-slate-200/50' 
-                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/80'
-            }`}
-          >
-            <Factory size={18} /> Mill Operations
-          </button>
+          <div className="flex flex-col">
+            <label className="text-[10px] font-bold text-slate-400 uppercase mb-1">By State</label>
+            <select 
+              value={filters.state}
+              onChange={(e) => setFilters({...filters, state: e.target.value})}
+              className="bg-slate-50 border border-slate-200 text-sm font-bold text-slate-700 py-1.5 px-3 rounded-md outline-none"
+            >
+              <option>All India</option>
+              <option>Madhya Pradesh</option>
+              <option>Gujarat</option>
+              <option>Maharashtra</option>
+              <option>Uttar Pradesh</option>
+              <option>Rajasthan</option>
+            </select>
+          </div>
 
-          <button
-            onClick={() => setActiveTab('quality')}
-            className={`flex items-center justify-center gap-2 py-3.5 px-6 text-sm font-bold rounded-lg uppercase tracking-wider transition-all ${
-              activeTab === 'quality' 
-                ? 'bg-white text-blue-600 shadow-sm border border-slate-200/50' 
-                : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/80'
-            }`}
-          >
-            <ActivitySquare size={18} /> Quality Control
-          </button>
-        </div>
-      </div>
+          <div className="h-10 w-px bg-slate-200" />
 
-      {/* Professional Warning Alert (Only shows if mills drop below 90%) */}
-      {actionRequiredCount > 0 && (
-        <div className="bg-amber-50 border-l-4 border-amber-500 p-4 mb-8 rounded-r-lg shadow-sm flex items-start gap-4">
-          <AlertTriangle size={24} className="text-amber-500 shrink-0 mt-0.5" />
-          <div>
-            <h3 className="font-semibold text-amber-800">Action Required</h3>
-            <p className="text-amber-700 text-sm mt-1">
-              {actionRequiredCount} partner mills are currently trending below 90% FSSAI compliance thresholds. Immediate follow-up required.
-            </p>
+          <div className="flex flex-col">
+            <label className="text-[10px] font-bold text-slate-400 uppercase mb-1">Analysis Year</label>
+            <select 
+              value={filters.year}
+              onChange={(e) => setFilters({...filters, year: e.target.value})}
+              className="bg-slate-50 border border-slate-200 text-sm font-bold text-slate-700 py-1.5 px-3 rounded-md outline-none"
+            >
+              <option value="2025">2025</option>
+              <option value="2024">2024</option>
+              <option value="2023">2023</option>
+            </select>
           </div>
         </div>
-      )}
 
-      {/* Main Content Area - Renders the selected tab */}
-      <main className="max-w-7xl mx-auto">
-        {activeTab === 'overview' && <OverviewTab />}
-        {activeTab === 'mills' && <MillsTab mills={mills} setMills={setMills} />}
-        {activeTab === 'quality' && <QualityTab />}
+       {/* Dynamic Tab Content */}
+      <div className="animate-in fade-in duration-500">
+      {activeTab === 'overview' && <OverviewTab filters={filters} />}
+      {/* The fix: Pass the filters prop here */}
+      {activeTab === 'quality' && <QualityTab filters={filters} />} 
+    </div>
       </main>
     </div>
   );
 }
+
+export default App;
