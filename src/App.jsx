@@ -64,10 +64,8 @@ function App() {
           </div>
         </div>
 
-       {/* Dynamic Tab Content */}
       <div className="animate-in fade-in duration-500">
       {activeTab === 'overview' && <OverviewTab filters={filters} />}
-      {/* The fix: Pass the filters prop here */}
       {activeTab === 'quality' && <QualityTab filters={filters} />} 
     </div>
       </main>

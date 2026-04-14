@@ -12,7 +12,6 @@ const complianceChartData = [
 export default function QualityTab({ filters }) {
   const [internalFilter, setInternalFilter] = useState('All');
 
-  // DRILLDOWN LOGIC: Filters based on Top Bar (State) AND Internal Log Filter (Status)
   const filteredLogs = auditLogs.filter(log => {
     const stateMatch = filters.state === 'All India' || log.state === filters.state;
     const statusMatch = internalFilter === 'All' || log.status === internalFilter;
@@ -21,7 +20,6 @@ export default function QualityTab({ filters }) {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Header Area */}
       <div className="flex justify-between items-end">
         <div>
           <h2 className="text-2xl font-bold text-slate-900">Quality Assurance Hub</h2>
@@ -32,7 +30,6 @@ export default function QualityTab({ filters }) {
         </div>
       </div>
 
-      {/* Methodology Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
@@ -58,7 +55,6 @@ export default function QualityTab({ filters }) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* Compliance Graph - 2 Cols */}
         <div className="lg:col-span-2 bg-white p-8 rounded-2xl border border-slate-200 shadow-sm">
           <h3 className="font-bold text-slate-900 mb-6 flex items-center gap-2">
             Compliance Breakdown ({filters.year})
@@ -80,14 +76,12 @@ export default function QualityTab({ filters }) {
           </div>
         </div>
 
-        {/* Filterable Internal Audit Log - 3 Cols */}
         <div className="lg:col-span-3 bg-slate-900 rounded-2xl shadow-2xl flex flex-col border border-slate-800 overflow-hidden">
           <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/[0.02]">
             <div className="flex items-center gap-3 text-emerald-400">
               <Activity size={20} />
               <h3 className="font-bold text-white">Internal Audit Log: {filters.state}</h3>
             </div>
-            {/* Local Filter Toggle */}
             <div className="flex gap-2 bg-white/5 p-1 rounded-lg border border-white/10">
               {['All', 'Adequate', 'Partial', 'Under'].map(f => (
                 <button 
@@ -122,7 +116,6 @@ export default function QualityTab({ filters }) {
         </div>
       </div>
 
-      {/* AI Methodology Section */}
       <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
         <div className="p-8 bg-slate-50 border-b border-slate-200">
           <h3 className="text-xl font-bold text-slate-900 flex items-center gap-3">
